@@ -1,0 +1,24 @@
+{
+  "name": "qa-automation-lebane",
+  "version": "1.0.0",
+  "description": "QA Automation for Lebane price list and unit management system",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    "test:report": "playwright show-report reports/html",
+    "test:spec": "playwright test --grep",
+    "lint": "eslint tests/ utils/ config/"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.44.0",
+    "eslint": "^9.4.0"
+  },
+  "keywords": ["playwright", "automation", "qa", "testing"],
+  "author": "QA Team",
+  "license": "MIT"
+}
