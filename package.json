@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "description": "QA Automation for Lebane price list and unit management system",
   "scripts": {
-    "test": "playwright test",
-    "test:headed": "playwright test --headed",
-    "test:debug": "playwright test --debug",
-    "test:ui": "playwright test --ui",
+    "test": "playwright test --config=config/playwright.config.js",
+    "test:headed": "playwright test --config=config/playwright.config.js --headed",
+    "test:debug": "playwright test --config=config/playwright.config.js --debug",
+    "test:ui": "playwright test --config=config/playwright.config.js --ui",
     "test:report": "playwright show-report reports/html",
-    "test:spec": "playwright test --grep",
+    "test:spec": "playwright test --config=config/playwright.config.js --grep",
     "lint": "eslint tests/ utils/ config/"
   },
   "dependencies": {
