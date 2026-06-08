@@ -1,0 +1,17 @@
+{
+  "templates": [
+    {
+      "name": "Template Residencial",
+      "description": "Template estándar para proyectos residenciales",
+      "expectedUnits": 5,
+      "expectedPriceList": "Lista Residencial"
+    },
+    {
+      "name": "Template Comercial",
+      "description": "Template estándar para locales comerciales",
+      "expectedUnits": 3,
+      "expectedPriceList": "Lista Comercial"
+    }
+  ],
+  "default": "Template Residencial"
+}
