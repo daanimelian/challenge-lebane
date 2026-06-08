@@ -29,6 +29,12 @@ module.exports = defineConfig({
         outputFile: `../${env.reportDir}/json/results.json`,
       },
     ],
+    [
+      'junit',
+      {
+        outputFile: `../${env.reportDir}/junit/results.xml`,
+      },
+    ],
   ],
 
   use: {

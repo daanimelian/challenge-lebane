@@ -3,12 +3,20 @@
   "version": "1.0.0",
   "description": "QA Automation for Lebane price list and unit management system",
   "scripts": {
+    "pretest": "node -e \"require('fs').mkdirSync('reports/json', { recursive: true }); require('fs').mkdirSync('reports/html', { recursive: true }); require('fs').mkdirSync('reports/junit', { recursive: true }); require('fs').mkdirSync('reports/artifacts', { recursive: true });\"",
     "test": "playwright test --config=config/playwright.config.js",
     "test:headed": "playwright test --config=config/playwright.config.js --headed",
     "test:debug": "playwright test --config=config/playwright.config.js --debug",
     "test:ui": "playwright test --config=config/playwright.config.js --ui",
+    "test:ci": "CI=true playwright test --config=config/playwright.config.js",
+    "test:tc001": "playwright test --config=config/playwright.config.js 01-project-creation",
+    "test:tc002": "playwright test --config=config/playwright.config.js --grep 'TC-002'",
+    "test:tc003": "playwright test --config=config/playwright.config.js --grep 'TC-003'",
+    "test:tc004": "playwright test --config=config/playwright.config.js 04-template-loading",
+    "test:tc005": "playwright test --config=config/playwright.config.js --grep 'TC-005'",
+    "test:tc006": "playwright test --config=config/playwright.config.js --grep 'TC-006'",
     "test:report": "playwright show-report reports/html",
-    "test:spec": "playwright test --config=config/playwright.config.js --grep",
+    "install:browsers": "playwright install chromium",
     "lint": "eslint tests/ utils/ config/"
   },
   "dependencies": {
