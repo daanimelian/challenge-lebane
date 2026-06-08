@@ -20,8 +20,10 @@ async function setupProjectWithUnits(page, unitConfig = testData.units.valid) {
   await projectPage.fillProjectForm({ ...testData.projects.valid, name: projectName });
   await projectPage.clickRegister();
 
-  // TODO: refinar navegación post-registro según comportamiento real de la app
+  await page.getByText('Comienza a operar tu proyecto').waitFor({ state: 'visible' });
   await page.getByRole('button').nth(1).click();
+  await page.getByRole('button', { name: 'Comercial' }).locator('button').click();
+  await page.waitForLoadState('networkidle');
   await page.getByRole('button', { name: 'Unidades' }).click();
   await page.waitForLoadState('networkidle');
 
@@ -34,13 +36,14 @@ async function setupProjectWithUnits(page, unitConfig = testData.units.valid) {
 }
 
 test.describe('TC-005: Eliminar Unidad (Normal)', () => {
-  test('eliminar una unidad reduce el listado y mantiene la lista de precios', async ({ page }) => {
+  test('eliminar una unidad reduce el listado y mantiene la lista de precios', { tag: '@sanity' }, async ({ page }) => {
     logger.step('Setup: login, proyecto y múltiples unidades');
     const { unitsPage, priceListPage } = await setupProjectWithUnits(page, {
       pricePerSqm: '12',
       expectedProfit: '1',
       floors: '3',
       basements: '0',
+      typologies: ['Dos ambientes'],
       unitsPerFloor: '2',
       parkingSpaces: '0',
     });
@@ -71,6 +74,7 @@ test.describe('TC-005: Eliminar Unidad (Normal)', () => {
       expectedProfit: '1',
       floors: '2',
       basements: '0',
+      typologies: ['Dos ambientes'],
       unitsPerFloor: '3',
       parkingSpaces: '0',
     });
@@ -90,13 +94,14 @@ test.describe('TC-005: Eliminar Unidad (Normal)', () => {
 });
 
 test.describe('TC-006: Eliminar Última Unidad de una Lista', () => {
-  test('eliminar la última unidad de la lista también elimina la lista de precios', async ({ page }) => {
+  test('eliminar la última unidad de la lista también elimina la lista de precios', { tag: '@sanity' }, async ({ page }) => {
     logger.step('Setup: login, proyecto y una sola unidad');
     const { unitsPage, priceListPage } = await setupProjectWithUnits(page, {
       pricePerSqm: '10',
       expectedProfit: '1',
       floors: '1',
       basements: '0',
+      typologies: ['Dos ambientes'],
       unitsPerFloor: '1',
       parkingSpaces: '0',
     });
@@ -128,6 +133,7 @@ test.describe('TC-006: Eliminar Última Unidad de una Lista', () => {
       expectedProfit: '1',
       floors: '1',
       basements: '0',
+      typologies: ['Dos ambientes'],
       unitsPerFloor: '2',
       parkingSpaces: '0',
     });

@@ -21,8 +21,10 @@ async function loginAndNavigateToUnits(page) {
   await projectPage.fillProjectForm({ ...testData.projects.valid, name: projectName });
   await projectPage.clickRegister();
 
-  // TODO: refinar navegación post-registro según comportamiento real de la app
+  await page.getByText('Comienza a operar tu proyecto').waitFor({ state: 'visible' });
   await page.getByRole('button').nth(1).click();
+  await page.getByRole('button', { name: 'Comercial' }).locator('button').click();
+  await page.waitForLoadState('networkidle');
   await page.getByRole('button', { name: 'Unidades' }).click();
   await page.waitForLoadState('networkidle');
 
@@ -30,7 +32,7 @@ async function loginAndNavigateToUnits(page) {
 }
 
 test.describe('TC-004: Cargar Template', () => {
-  test('cargar template crea nueva lista de precios', async ({ page }) => {
+  test('cargar template crea nueva lista de precios', { tag: '@sanity' }, async ({ page }) => {
     const unitsPage = new UnitsPage(page);
     const priceListPage = new PriceListPage(page);
     const defaultTemplate = { name: 'unit-template.csv' };
@@ -66,6 +68,11 @@ test.describe('TC-004: Cargar Template', () => {
 
     logger.step('Login y crear proyecto base');
     await loginAndNavigateToUnits(page);
+
+    logger.step('Completar formulario Actualizar datos del proyecto');
+    await unitsPage.fillUnitForm(testData.units.valid);
+    await unitsPage.saveUnits();
+    await priceListPage.waitForPriceList();
 
     logger.step('Cargar template');
     await unitsPage.loadTemplate(XLSX_TEMPLATE_PATH);

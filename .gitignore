@@ -8,3 +8,4 @@ playwright-report/
 *.local
 .DS_Store
 tests/fixtures/unit-template.xlsx
+CLAUDE.md

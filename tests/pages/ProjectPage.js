@@ -10,7 +10,7 @@ class ProjectPage extends BasePage {
     await this.page.getByRole('textbox', { name: 'Nombre' }).waitFor({ state: 'visible' });
   }
 
-  async fillProjectForm({ name, currency = 'ARS', country = 'Argentina', province = 'Buenos Aires', city, address = 'Calle Test', doorNumber = '123', type = 'Edificio', company }) {
+  async fillProjectForm({ name, currency = 'ARS', country = 'Argentina', province = 'Buenos Aires', city, address = 'Calle Test', doorNumber = '123', type = 'Edificio', adjustmentMode = 'Disponible al vencimiento', company }) {
     await this.page.getByRole('textbox', { name: 'Nombre' }).fill(name);
 
     // Currency
@@ -40,8 +40,12 @@ class ProjectPage extends BasePage {
     await this.page.getByRole('gridcell').first().click();
 
     // Project type
-    await this.page.getByRole('combobox', { name: 'Seleccionar' }).nth(4).click();
+    await this.page.getByRole('button', { name: 'Abierto' }).nth(4).click();
     await this.page.getByRole('option', { name: type, exact: true }).click();
+
+    // Modalidad de ajuste
+    await this.page.getByRole('button', { name: 'Abierto' }).nth(5).click();
+    await this.page.getByRole('option', { name: adjustmentMode }).click();
 
     // Company/developer
     if (company) {
@@ -53,6 +57,7 @@ class ProjectPage extends BasePage {
   async clickRegister() {
     await this.page.getByRole('button', { name: 'Registrar' }).click();
     await this.page.waitForLoadState('networkidle');
+    await this.page.getByRole('button', { name: 'Cerrar' }).click();
   }
 
   async createNewProject(projectData) {

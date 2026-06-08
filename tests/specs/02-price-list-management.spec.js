@@ -18,8 +18,10 @@ async function loginAndCreateProject(page) {
   await projectPage.fillProjectForm({ ...testData.projects.valid, name: projectName });
   await projectPage.clickRegister();
 
-  // TODO: refinar navegación post-registro según comportamiento real de la app
+  await page.getByText('Comienza a operar tu proyecto').waitFor({ state: 'visible' });
   await page.getByRole('button').nth(1).click();
+  await page.getByRole('button', { name: 'Comercial' }).locator('button').click();
+  await page.waitForLoadState('networkidle');
   await page.getByRole('button', { name: 'Unidades' }).click();
   await page.waitForLoadState('networkidle');
 
@@ -27,7 +29,7 @@ async function loginAndCreateProject(page) {
 }
 
 test.describe('TC-002: Crear Unidades y Verificar Lista de Precios', () => {
-  test('crear unidades via formulario y verificar que aparecen en lista de precios', async ({ page }) => {
+  test('crear unidades via formulario y verificar que aparecen en lista de precios', { tag: '@sanity' }, async ({ page }) => {
     const unitsPage = new UnitsPage(page);
     const priceListPage = new PriceListPage(page);
 
@@ -73,6 +75,7 @@ test.describe('TC-002: Crear Unidades y Verificar Lista de Precios', () => {
       expectedProfit: '1',
       floors: '1',
       basements: '0',
+      typologies: ['Dos ambientes'],
       unitsPerFloor: '1',
       parkingSpaces: '0',
     });
@@ -92,7 +95,7 @@ test.describe('TC-002: Crear Unidades y Verificar Lista de Precios', () => {
 });
 
 test.describe('TC-003: Modificar Precio de Lista', () => {
-  test('modificar precio por m² y verificar que se actualiza en la lista', async ({ page }) => {
+  test('modificar precio por m² y verificar que se actualiza en la lista', { tag: '@sanity' }, async ({ page }) => {
     const unitsPage = new UnitsPage(page);
     const priceListPage = new PriceListPage(page);
 
@@ -102,6 +105,10 @@ test.describe('TC-003: Modificar Precio de Lista', () => {
     await unitsPage.saveUnits();
     await priceListPage.waitForPriceList();
     logger.info('Setup completado — proyecto y unidades creados');
+
+    logger.step('Completar M2 Cubiertos en primera unidad para precio calculable');
+    await priceListPage.navigateToUnitsTab();
+    await unitsPage.fillFirstUnitCoveredMeters();
 
     logger.step('Leer precio inicial');
     const initialPrice = testData.prices.initial;
@@ -120,6 +127,12 @@ test.describe('TC-003: Modificar Precio de Lista', () => {
     const hasPriceList = await priceListPage.priceListExists();
     expect(hasPriceList).toBe(true);
     logger.info('Lista de precios intacta luego de modificación');
+
+    logger.step('Verificar que el precio de la unidad refleja el cambio');
+    await priceListPage.navigateToUnitsTab();
+    const unitPrice = await unitsPage.getFirstUnitPrice();
+    expect(unitPrice).not.toBe('0,00');
+    logger.info('Precio de unidad verificado', { price: unitPrice });
   });
 
   test('modificar precio no elimina unidades existentes', async ({ page }) => {
@@ -137,6 +150,9 @@ test.describe('TC-003: Modificar Precio de Lista', () => {
     const countBefore = await unitsPage.getUnitCount();
     expect(countBefore).toBeGreaterThan(0);
     logger.info('Unidades antes de modificar precio', { count: countBefore });
+
+    logger.step('Completar M2 Cubiertos en primera unidad');
+    await unitsPage.fillFirstUnitCoveredMeters();
 
     logger.step('Modificar precio');
     await priceListPage.modifyPrice('precioListaMetroCuadrado', testData.prices.updated);

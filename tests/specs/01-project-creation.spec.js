@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const LoginPage = require('../pages/LoginPage');
 const ProjectPage = require('../pages/ProjectPage');
+const UnitsPage = require('../pages/UnitsPage');
 const PriceListPage = require('../pages/PriceListPage');
 const testData = require('../fixtures/test-data');
 const logger = require('../../utils/logger');
@@ -14,8 +15,9 @@ test.describe('TC-001: Crear Proyecto', () => {
     logger.info('Login exitoso');
   });
 
-  test('crear proyecto con nombre genera lista de precios inicial', async ({ page }) => {
+  test('crear proyecto con nombre genera lista de precios inicial', { tag: '@sanity' }, async ({ page }) => {
     const projectPage = new ProjectPage(page);
+    const unitsPage = new UnitsPage(page);
     const priceListPage = new PriceListPage(page);
     const projectName = testData.projects.valid.name();
 
@@ -32,13 +34,22 @@ test.describe('TC-001: Crear Proyecto', () => {
     await projectPage.clickRegister();
     logger.info('Proyecto registrado', { name: projectName });
 
-    // TODO: refinar navegación post-registro según comportamiento real de la app
     logger.step('Navegar a sección Unidades del proyecto');
+    await page.getByText('Comienza a operar tu proyecto').waitFor({ state: 'visible' });
     await page.getByRole('button').nth(1).click();
+    await page.getByRole('button', { name: 'Comercial' }).locator('button').click();
+    await page.waitForLoadState('networkidle');
     await page.getByRole('button', { name: 'Unidades' }).click();
     await page.waitForLoadState('networkidle');
 
-    logger.step('Verificar que se creó lista de precios inicial');
+    logger.step('Completar formulario Actualizar datos del proyecto');
+    await unitsPage.fillUnitForm(testData.units.valid);
+
+    logger.step('Guardar formulario de unidades');
+    await unitsPage.saveUnits();
+    logger.info('Formulario de unidades guardado');
+
+    logger.step('Verificar que se creó lista de precios');
     await priceListPage.waitForPriceList();
     const hasPriceList = await priceListPage.priceListExists();
     expect(hasPriceList).toBe(true);
@@ -48,9 +59,8 @@ test.describe('TC-001: Crear Proyecto', () => {
     logger.info('Lista de precios verificada', { name: priceListName });
   });
 
-  test('crear proyecto sin nombre usa nombre por defecto', async ({ page }) => {
+  test('el botón Registrar queda deshabilitado si el nombre está vacío', async ({ page }) => {
     const projectPage = new ProjectPage(page);
-    const priceListPage = new PriceListPage(page);
 
     logger.step('Abrir formulario de nuevo proyecto');
     await projectPage.clickNewProject();
@@ -61,18 +71,9 @@ test.describe('TC-001: Crear Proyecto', () => {
       name: '',
     });
 
-    logger.step('Registrar proyecto');
-    await projectPage.clickRegister();
-
-    logger.step('Navegar a sección Unidades del proyecto');
-    await page.getByRole('button').nth(1).click();
-    await page.getByRole('button', { name: 'Unidades' }).click();
-    await page.waitForLoadState('networkidle');
-
-    logger.step('Verificar que se creó lista de precios inicial');
-    await priceListPage.waitForPriceList();
-    const hasPriceList = await priceListPage.priceListExists();
-    expect(hasPriceList).toBe(true);
-    logger.info('Lista de precios generada correctamente para proyecto sin nombre');
+    logger.step('Verificar que Registrar está deshabilitado');
+    const registerBtn = page.getByRole('button', { name: 'Registrar' });
+    await expect(registerBtn).toBeDisabled();
+    logger.info('Validación correcta: Registrar deshabilitado sin nombre');
   });
 });
