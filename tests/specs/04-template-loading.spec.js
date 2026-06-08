@@ -1,11 +1,13 @@
 const { test, expect } = require('@playwright/test');
+const path = require('path');
 const LoginPage = require('../pages/LoginPage');
 const ProjectPage = require('../pages/ProjectPage');
 const UnitsPage = require('../pages/UnitsPage');
 const PriceListPage = require('../pages/PriceListPage');
 const testData = require('../fixtures/test-data');
-const templates = require('../fixtures/templates.json');
 const logger = require('../../utils/logger');
+
+const XLSX_TEMPLATE_PATH = path.resolve(__dirname, '../fixtures/unit-template.xlsx');
 
 async function loginAndNavigateToUnits(page) {
   const loginPage = new LoginPage(page);
@@ -31,7 +33,7 @@ test.describe('TC-004: Cargar Template', () => {
   test('cargar template crea nueva lista de precios', async ({ page }) => {
     const unitsPage = new UnitsPage(page);
     const priceListPage = new PriceListPage(page);
-    const defaultTemplate = templates.templates[0];
+    const defaultTemplate = { name: 'unit-template.csv' };
 
     logger.step('Login y crear proyecto base');
     await loginAndNavigateToUnits(page);
@@ -45,7 +47,7 @@ test.describe('TC-004: Cargar Template', () => {
     logger.info('Listas de precios antes de cargar template', { count: priceListCountBefore });
 
     logger.step('Cargar template');
-    await unitsPage.loadTemplate(defaultTemplate.name);
+    await unitsPage.loadTemplate(XLSX_TEMPLATE_PATH);
     logger.info('Template cargado', { template: defaultTemplate.name });
 
     logger.step('Verificar que se creó una nueva lista de precios');
@@ -61,14 +63,13 @@ test.describe('TC-004: Cargar Template', () => {
   test('cargar template crea unidades asociadas', async ({ page }) => {
     const unitsPage = new UnitsPage(page);
     const priceListPage = new PriceListPage(page);
-    const defaultTemplate = templates.templates[0];
 
     logger.step('Login y crear proyecto base');
     await loginAndNavigateToUnits(page);
 
     logger.step('Cargar template');
-    await unitsPage.loadTemplate(defaultTemplate.name);
-    logger.info('Template cargado', { template: defaultTemplate.name });
+    await unitsPage.loadTemplate(XLSX_TEMPLATE_PATH);
+    logger.info('Template cargado', { template: 'unit-template.csv' });
 
     logger.step('Verificar lista de precios del template');
     await priceListPage.waitForPriceList();
@@ -84,7 +85,6 @@ test.describe('TC-004: Cargar Template', () => {
   test('cargar template sobre proyecto con unidades existentes mantiene lista original', async ({ page }) => {
     const unitsPage = new UnitsPage(page);
     const priceListPage = new PriceListPage(page);
-    const defaultTemplate = templates.templates[0];
 
     logger.step('Login, crear proyecto y unidades base');
     await loginAndNavigateToUnits(page);
@@ -98,7 +98,7 @@ test.describe('TC-004: Cargar Template', () => {
     logger.info('Estado antes del template', { unidades: unitCountBefore, listas: priceListCountBefore });
 
     logger.step('Cargar template');
-    await unitsPage.loadTemplate(defaultTemplate.name);
+    await unitsPage.loadTemplate(XLSX_TEMPLATE_PATH);
 
     logger.step('Verificar que la lista original se mantiene y se agregó una nueva');
     await priceListPage.waitForPriceList();

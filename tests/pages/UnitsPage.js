@@ -60,9 +60,13 @@ class UnitsPage extends BasePage {
     return await this.page.getByRole('button', { name: 'Eliminar' }).count();
   }
 
-  async loadTemplate(templateName) {
+  async loadTemplate(csvFilePath) {
+    // TODO: verificar el selector exacto del botón que abre el file picker
     await this.page.getByRole('button', { name: 'Cargar template' }).click();
-    await this.page.getByRole('option', { name: templateName }).click();
+
+    const fileInput = this.page.locator('input[type="file"]');
+    await fileInput.setInputFiles(csvFilePath);
+
     await this.page.getByRole('button', { name: 'Confirmar' }).click();
     await this.page.waitForLoadState('networkidle');
   }

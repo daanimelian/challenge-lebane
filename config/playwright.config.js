@@ -2,6 +2,7 @@ const { defineConfig, devices } = require('@playwright/test');
 const env = require('./environments');
 
 module.exports = defineConfig({
+  globalSetup: './global-setup.js',
   testDir: '../tests/specs',
   outputDir: `../${env.reportDir}/artifacts`,
   fullyParallel: false,
