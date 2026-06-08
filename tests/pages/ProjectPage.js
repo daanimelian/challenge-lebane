@@ -1,59 +1,79 @@
 const BasePage = require('./BasePage');
 
-// TODO: update selectors after inspecting https://tst.lebane.app
-const SELECTORS = {
-  newProjectButton: '[data-testid="new-project-btn"], button:has-text("Nuevo proyecto"), button:has-text("Crear proyecto")',
-  projectNameInput: '[data-testid="project-name-input"], input[name="name"], input[placeholder*="nombre"]',
-  createProjectButton: '[data-testid="create-project-btn"], button[type="submit"]:has-text("Crear")',
-  projectListItem: '[data-testid="project-item"], .project-item, .project-card',
-  projectByName: (name) => `[data-testid="project-item"]:has-text("${name}"), .project-item:has-text("${name}")`,
-  priceListSection: '[data-testid="price-list"], .price-list, [class*="price-list"]',
-  priceListItem: '[data-testid="price-list-item"], .price-list-item',
-};
-
 class ProjectPage extends BasePage {
   constructor(page) {
     super(page);
-    this.path = '/proyectos';
-  }
-
-  async navigateToProjects() {
-    await super.navigate(this.path);
-    await this.waitForVisible(SELECTORS.newProjectButton);
   }
 
   async clickNewProject() {
-    await this.click(SELECTORS.newProjectButton);
+    await this.page.getByRole('button', { name: 'Agregar proyecto' }).first().click();
+    await this.page.getByRole('textbox', { name: 'Nombre' }).waitFor({ state: 'visible' });
   }
 
-  async fillProjectForm({ name }) {
-    await this.waitForVisible(SELECTORS.projectNameInput);
-    await this.fill(SELECTORS.projectNameInput, name);
+  async fillProjectForm({ name, currency = 'ARS', country = 'Argentina', province = 'Buenos Aires', city, address = 'Calle Test', doorNumber = '123', type = 'Edificio', company }) {
+    await this.page.getByRole('textbox', { name: 'Nombre' }).fill(name);
+
+    // Currency
+    await this.page.getByRole('button', { name: 'Abierto' }).first().click();
+    await this.page.getByRole('option', { name: currency }).click();
+
+    // Country
+    await this.page.getByRole('button', { name: 'Abierto' }).nth(1).click();
+    await this.page.getByRole('option', { name: country }).click();
+
+    // Province
+    await this.page.getByRole('button', { name: 'Abierto' }).nth(2).click();
+    await this.page.getByRole('option', { name: province, exact: true }).click();
+
+    // City
+    if (city) {
+      await this.page.getByRole('button', { name: 'Abierto' }).nth(3).click();
+      await this.page.getByRole('option', { name: city }).click();
+    }
+
+    // Address
+    await this.page.getByRole('textbox', { name: 'Dirección' }).fill(address);
+    await this.page.locator('input[name="numeroPuerta"]').fill(doorNumber);
+
+    // Date (pick first available)
+    await this.page.getByRole('button', { name: 'Elige la fecha', exact: true }).click();
+    await this.page.getByRole('gridcell').first().click();
+
+    // Project type
+    await this.page.getByRole('combobox', { name: 'Seleccionar' }).nth(4).click();
+    await this.page.getByRole('option', { name: type, exact: true }).click();
+
+    // Company/developer
+    if (company) {
+      await this.page.getByRole('combobox', { name: 'Escribí para buscar o crear' }).click();
+      await this.page.getByRole('option', { name: company }).click();
+    }
   }
 
-  async clickCreateBtn() {
-    await this.click(SELECTORS.createProjectButton);
+  async clickRegister() {
+    await this.page.getByRole('button', { name: 'Registrar' }).click();
     await this.page.waitForLoadState('networkidle');
   }
 
   async createNewProject(projectData) {
     await this.clickNewProject();
     await this.fillProjectForm(projectData);
-    await this.clickCreateBtn();
+    await this.clickRegister();
   }
 
-  async projectExists(name) {
-    return await this.isVisible(SELECTORS.projectByName(name));
+  async navigateToUnits() {
+    await this.page.getByRole('button', { name: 'Unidades' }).click();
+    await this.page.waitForLoadState('networkidle');
   }
 
   async verifyPriceListCreated() {
-    await this.waitForVisible(SELECTORS.priceListSection);
-    return await this.getCount(SELECTORS.priceListItem) > 0;
+    return await this.page.getByRole('heading', { name: 'Nombre de la lista de precios' }).isVisible();
   }
 
-  async openProject(name) {
-    await this.click(SELECTORS.projectByName(name));
-    await this.page.waitForLoadState('networkidle');
+  async getPriceListName() {
+    const heading = this.page.getByRole('heading', { name: 'Nombre de la lista de precios' });
+    await heading.waitFor({ state: 'visible' });
+    return await this.page.locator('[data-testid="price-list-name"], .price-list-name').first().innerText();
   }
 }
 

@@ -1,35 +1,26 @@
 const BasePage = require('./BasePage');
 
-// TODO: update selectors after inspecting https://tst.lebane.app
-const SELECTORS = {
-  emailInput: 'input[type="email"]',
-  passwordInput: 'input[type="password"]',
-  loginButton: 'button[type="submit"]',
-  errorMessage: '[data-testid="error-message"], .error-message, [role="alert"]',
-  userAvatar: '[data-testid="user-avatar"], .user-avatar, header .avatar',
-};
-
 class LoginPage extends BasePage {
   constructor(page) {
     super(page);
-    this.path = '/login';
+    this.path = '/sign-in';
   }
 
   async navigate() {
     await super.navigate(this.path);
-    await this.waitForVisible(SELECTORS.emailInput);
+    await this.page.getByRole('textbox', { name: 'ejemplo@compañia.com' }).waitFor({ state: 'visible' });
   }
 
   async fillEmail(email) {
-    await this.fill(SELECTORS.emailInput, email);
+    await this.page.getByRole('textbox', { name: 'ejemplo@compañia.com' }).fill(email);
   }
 
   async fillPassword(password) {
-    await this.fill(SELECTORS.passwordInput, password);
+    await this.page.getByRole('textbox', { name: 'Contraseña *' }).fill(password);
   }
 
   async clickLoginBtn() {
-    await this.click(SELECTORS.loginButton);
+    await this.page.getByRole('button', { name: 'Ingresar' }).click();
   }
 
   async login(email, password) {
@@ -39,12 +30,8 @@ class LoginPage extends BasePage {
     await this.page.waitForLoadState('networkidle');
   }
 
-  async getErrorMessage() {
-    return await this.getText(SELECTORS.errorMessage);
-  }
-
   async isLoggedIn() {
-    return await this.isVisible(SELECTORS.userAvatar);
+    return await this.page.getByRole('button', { name: 'Agregar proyecto' }).first().isVisible();
   }
 }
 

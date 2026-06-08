@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const uniqueSuffix = () => Date.now().toString().slice(-6);
 
 module.exports = {
@@ -9,27 +11,30 @@ module.exports = {
   projects: {
     valid: {
       name: () => `Proyecto Test ${uniqueSuffix()}`,
-    },
-    withoutName: {
-      name: '',
+      currency: 'ARS',
+      country: 'Argentina',
+      province: 'Buenos Aires',
+      city: 'De Mayo',
+      address: 'Av. Test',
+      doorNumber: '123',
+      type: 'Edificio',
+      company: 'CRIBA S.A.',
     },
   },
 
   units: {
     valid: {
-      name: () => `Unidad ${uniqueSuffix()}`,
-      floor: '1',
-      type: 'Departamento',
-      surface: '65',
-    },
-    minimal: {
-      name: () => `U-${uniqueSuffix()}`,
+      pricePerSqm: '12',
+      expectedProfit: '1',
+      floors: '5',
+      basements: '1',
+      unitsPerFloor: '3',
+      parkingSpaces: '1',
     },
   },
 
   prices: {
-    initial: '100000',
-    updated: '150000',
-    high: '500000',
+    initial: '12',
+    updated: '20',
   },
 };
