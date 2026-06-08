@@ -90,3 +90,61 @@ test.describe('TC-002: Crear Unidades y Verificar Lista de Precios', () => {
     logger.info('Unidad mínima verificada', { count: unitCount });
   });
 });
+
+test.describe('TC-003: Modificar Precio de Lista', () => {
+  test('modificar precio por m² y verificar que se actualiza en la lista', async ({ page }) => {
+    const unitsPage = new UnitsPage(page);
+    const priceListPage = new PriceListPage(page);
+
+    logger.step('Login, crear proyecto y unidades');
+    await loginAndCreateProject(page);
+    await unitsPage.fillUnitForm(testData.units.valid);
+    await unitsPage.saveUnits();
+    await priceListPage.waitForPriceList();
+    logger.info('Setup completado — proyecto y unidades creados');
+
+    logger.step('Leer precio inicial');
+    const initialPrice = testData.prices.initial;
+    logger.info('Precio inicial', { price: initialPrice });
+
+    logger.step('Modificar precio por m²');
+    await priceListPage.modifyPrice('precioListaMetroCuadrado', testData.prices.updated);
+    logger.info('Precio modificado', { newPrice: testData.prices.updated });
+
+    logger.step('Verificar que el precio se actualizó');
+    const updatedInput = page.locator('input[name="precioListaMetroCuadrado"]');
+    await expect(updatedInput).toHaveValue(testData.prices.updated);
+    logger.info('Precio actualizado verificado');
+
+    logger.step('Verificar que la lista de precios sigue existiendo');
+    const hasPriceList = await priceListPage.priceListExists();
+    expect(hasPriceList).toBe(true);
+    logger.info('Lista de precios intacta luego de modificación');
+  });
+
+  test('modificar precio no elimina unidades existentes', async ({ page }) => {
+    const unitsPage = new UnitsPage(page);
+    const priceListPage = new PriceListPage(page);
+
+    logger.step('Login, crear proyecto y unidades');
+    await loginAndCreateProject(page);
+    await unitsPage.fillUnitForm(testData.units.valid);
+    await unitsPage.saveUnits();
+    await priceListPage.waitForPriceList();
+
+    logger.step('Navegar a tab Unidades y contar unidades previas');
+    await priceListPage.navigateToUnitsTab();
+    const countBefore = await unitsPage.getUnitCount();
+    expect(countBefore).toBeGreaterThan(0);
+    logger.info('Unidades antes de modificar precio', { count: countBefore });
+
+    logger.step('Modificar precio');
+    await priceListPage.modifyPrice('precioListaMetroCuadrado', testData.prices.updated);
+
+    logger.step('Verificar que las unidades se mantienen');
+    await priceListPage.navigateToUnitsTab();
+    const countAfter = await unitsPage.getUnitCount();
+    expect(countAfter).toBe(countBefore);
+    logger.info('Unidades después de modificar precio', { count: countAfter });
+  });
+});
