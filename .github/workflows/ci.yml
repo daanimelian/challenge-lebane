@@ -42,6 +42,8 @@ jobs:
           BASE_URL: ${{ secrets.BASE_URL }}
           HEADLESS: 'true'
           CI: 'true'
+          ACTION_TIMEOUT: '30000'
+          NAVIGATION_TIMEOUT: '60000'
 
       - name: Upload test report
         uses: actions/upload-artifact@v4

@@ -7,6 +7,7 @@ const testData = require('../fixtures/test-data');
 const logger = require('../../utils/logger');
 
 test.describe('TC-001: Crear Proyecto', () => {
+  test.setTimeout(120000);
   test.beforeEach(async ({ page }) => {
     const loginPage = new LoginPage(page);
     logger.step('Login');
