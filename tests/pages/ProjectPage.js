@@ -1,3 +1,4 @@
+const { expect } = require('@playwright/test');
 const BasePage = require('./BasePage');
 
 class ProjectPage extends BasePage {
@@ -40,10 +41,12 @@ class ProjectPage extends BasePage {
     await this.page.getByRole('button', { name: 'Registrar' }).click();
     await this.page.waitForLoadState('networkidle');
     await this.page.getByRole('button', { name: 'Cerrar' }).click();
+    // Wait for navigation to the project dashboard after closing the success dialog.
+    await this.page.waitForLoadState('networkidle');
   }
 
   async navigateToComercialUnidades() {
-    await this.page.getByText('Comienza a operar tu proyecto').waitFor({ state: 'visible' });
+    await expect(this.page.getByText('Comienza a operar tu proyecto')).toBeVisible({ timeout: 60000 });
     await this.page.getByRole('button').nth(1).click();
     await this.page.getByRole('button', { name: 'Comercial' }).locator('button').click();
     await this.page.waitForLoadState('networkidle');

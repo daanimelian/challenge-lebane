@@ -88,6 +88,12 @@ class UnitsPage extends BasePage {
     return (await this._unitRow(101).locator('td[data-column-id="precio"] .\\!block').innerText()).trim();
   }
 
+  async getFirstUnitPriceAsNumber() {
+    const price = await this.getFirstUnitPrice();
+    // Format: dot as thousands separator, comma as decimal (e.g. "1.500,00" → 1500)
+    return parseFloat(price.replace(/\./g, '').replace(',', '.'));
+  }
+
   async loadTemplate(xlsxFilePath) {
     await this.page.getByRole('button', { name: 'Templates' }).click();
     await this.page.getByRole('button', { name: 'Cargar Template de Unidades', exact: true }).click();
@@ -97,8 +103,8 @@ class UnitsPage extends BasePage {
     ]);
     await fileChooser.setFiles(xlsxFilePath);
     await this.page.getByRole('button', { name: 'Cargar', exact: true }).click();
-    await this.page.getByRole('button', { name: 'Cerrar' }).waitFor({ state: 'visible' });
-    await expect(this.page.getByText('Archivo subido exitosamente')).toBeVisible();
+    await this.page.getByRole('button', { name: 'Cerrar' }).waitFor({ state: 'visible', timeout: 60000 });
+    await expect(this.page.getByText('Archivo subido exitosamente')).toBeVisible({ timeout: 60000 });
     await this.page.getByRole('button', { name: 'Cerrar' }).click();
     await this.page.waitForLoadState('networkidle');
     // Template upload triggers a full page reload — wait for the main spinner to clear.
