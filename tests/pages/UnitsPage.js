@@ -88,6 +88,12 @@ class UnitsPage extends BasePage {
     return (await this._unitRow(101).locator('td[data-column-id="precio"] .\\!block').innerText()).trim();
   }
 
+  async getFirstUnitPriceAsNumber() {
+    const price = await this.getFirstUnitPrice();
+    // Format: dot as thousands separator, comma as decimal (e.g. "1.500,00" → 1500)
+    return parseFloat(price.replace(/\./g, '').replace(',', '.'));
+  }
+
   async loadTemplate(xlsxFilePath) {
     await this.page.getByRole('button', { name: 'Templates' }).click();
     await this.page.getByRole('button', { name: 'Cargar Template de Unidades', exact: true }).click();
