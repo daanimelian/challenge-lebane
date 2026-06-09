@@ -21,12 +21,25 @@ class PriceListPage extends BasePage {
     return await this.page.locator('text=/Lista precios/').first().innerText();
   }
 
+  async openFirstPriceList() {
+    await this.navigateToGeneralTab();
+  }
+
   async navigateToUnitsTab() {
     await this.page.getByRole('tab', { name: 'Unidades' }).click();
     await this.page.waitForLoadState('networkidle');
   }
 
+  async navigateToGeneralTab() {
+    await this.page.getByRole('tab', { name: 'General' }).click();
+    await this.page.waitForLoadState('networkidle');
+  }
+
+  // Price editing lives behind an "Editar" button on the General tab.
+  // After saving, the form closes and the card shows the new value.
   async modifyPrice(inputName, newPrice) {
+    await this.navigateToGeneralTab();
+    await this.page.getByRole('button', { name: 'Editar' }).click();
     const input = this.page.locator(`input[name="${inputName}"]`);
     await input.click({ clickCount: 3 });
     await input.fill(String(newPrice));

@@ -57,6 +57,7 @@ test.describe('TC-005: Eliminar Unidad (Normal)', () => {
     logger.info('Unidad eliminada');
 
     logger.step('Verificar que el listado disminuyó en una unidad');
+    await priceListPage.navigateToUnitsTab();
     const countAfter = await unitsPage.getUnitCount();
     expect(countAfter).toBe(countBefore - 1);
     logger.info('Unidades después de eliminar', { count: countAfter });
@@ -86,6 +87,7 @@ test.describe('TC-005: Eliminar Unidad (Normal)', () => {
     await unitsPage.deleteUnit(1);
 
     logger.step('Verificar que quedan unidades y la lista de precios existe');
+    await priceListPage.navigateToUnitsTab();
     const countAfter = await unitsPage.getUnitCount();
     expect(countAfter).toBeGreaterThan(0);
     expect(await priceListPage.priceListExists()).toBe(true);
@@ -111,7 +113,7 @@ test.describe('TC-006: Eliminar Última Unidad de una Lista', () => {
     logger.info('Confirmado: solo existe una unidad', { count: unitCount });
 
     logger.step('Eliminar la única unidad');
-    await unitsPage.deleteUnit(1);
+    await unitsPage.deleteUnit(0);
     logger.info('Unidad eliminada');
 
     logger.step('Verificar que la unidad fue eliminada');
@@ -145,6 +147,7 @@ test.describe('TC-006: Eliminar Última Unidad de una Lista', () => {
     logger.step('Eliminar una unidad (queda una)');
     await unitsPage.deleteUnit(1);
 
+    await priceListPage.navigateToUnitsTab();
     const countAfter = await unitsPage.getUnitCount();
     expect(countAfter).toBe(1);
 

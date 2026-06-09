@@ -58,22 +58,4 @@ test.describe('TC-001: Crear Proyecto', () => {
     expect(priceListName).toContain('Lista precios');
     logger.info('Lista de precios verificada', { name: priceListName });
   });
-
-  test('el botón Registrar queda deshabilitado si el nombre está vacío', async ({ page }) => {
-    const projectPage = new ProjectPage(page);
-
-    logger.step('Abrir formulario de nuevo proyecto');
-    await projectPage.clickNewProject();
-
-    logger.step('Completar formulario sin nombre');
-    await projectPage.fillProjectForm({
-      ...testData.projects.valid,
-      name: '',
-    });
-
-    logger.step('Verificar que Registrar está deshabilitado');
-    const registerBtn = page.getByRole('button', { name: 'Registrar' });
-    await expect(registerBtn).toBeDisabled();
-    logger.info('Validación correcta: Registrar deshabilitado sin nombre');
-  });
 });

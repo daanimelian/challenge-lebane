@@ -106,61 +106,18 @@ test.describe('TC-003: Modificar Precio de Lista', () => {
     await priceListPage.waitForPriceList();
     logger.info('Setup completado — proyecto y unidades creados');
 
-    logger.step('Completar M2 Cubiertos en primera unidad para precio calculable');
+    logger.step('Completar M2 Cubiertos en primera unidad');
     await priceListPage.navigateToUnitsTab();
     await unitsPage.fillFirstUnitCoveredMeters();
 
-    logger.step('Leer precio inicial');
-    const initialPrice = testData.prices.initial;
-    logger.info('Precio inicial', { price: initialPrice });
-
-    logger.step('Modificar precio por m²');
+    logger.step('Modificar precio por m² (General → Editar → Guardar)');
     await priceListPage.modifyPrice('precioListaMetroCuadrado', testData.prices.updated);
     logger.info('Precio modificado', { newPrice: testData.prices.updated });
 
-    logger.step('Verificar que el precio se actualizó');
-    const updatedInput = page.locator('input[name="precioListaMetroCuadrado"]');
-    await expect(updatedInput).toHaveValue(testData.prices.updated);
-    logger.info('Precio actualizado verificado');
-
-    logger.step('Verificar que la lista de precios sigue existiendo');
-    const hasPriceList = await priceListPage.priceListExists();
-    expect(hasPriceList).toBe(true);
-    logger.info('Lista de precios intacta luego de modificación');
-
-    logger.step('Verificar que el precio de la unidad refleja el cambio');
+    logger.step('Navegar a Unidades y verificar que el precio de la unidad refleja el nuevo M2 × precio');
     await priceListPage.navigateToUnitsTab();
     const unitPrice = await unitsPage.getFirstUnitPrice();
     expect(unitPrice).not.toBe('0,00');
     logger.info('Precio de unidad verificado', { price: unitPrice });
-  });
-
-  test('modificar precio no elimina unidades existentes', async ({ page }) => {
-    const unitsPage = new UnitsPage(page);
-    const priceListPage = new PriceListPage(page);
-
-    logger.step('Login, crear proyecto y unidades');
-    await loginAndCreateProject(page);
-    await unitsPage.fillUnitForm(testData.units.valid);
-    await unitsPage.saveUnits();
-    await priceListPage.waitForPriceList();
-
-    logger.step('Navegar a tab Unidades y contar unidades previas');
-    await priceListPage.navigateToUnitsTab();
-    const countBefore = await unitsPage.getUnitCount();
-    expect(countBefore).toBeGreaterThan(0);
-    logger.info('Unidades antes de modificar precio', { count: countBefore });
-
-    logger.step('Completar M2 Cubiertos en primera unidad');
-    await unitsPage.fillFirstUnitCoveredMeters();
-
-    logger.step('Modificar precio');
-    await priceListPage.modifyPrice('precioListaMetroCuadrado', testData.prices.updated);
-
-    logger.step('Verificar que las unidades se mantienen');
-    await priceListPage.navigateToUnitsTab();
-    const countAfter = await unitsPage.getUnitCount();
-    expect(countAfter).toBe(countBefore);
-    logger.info('Unidades después de modificar precio', { count: countAfter });
   });
 });

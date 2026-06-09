@@ -1,3 +1,4 @@
+const { expect } = require('@playwright/test');
 const BasePage = require('./BasePage');
 
 class UnitsPage extends BasePage {
@@ -79,7 +80,8 @@ class UnitsPage extends BasePage {
     await this.page.getByRole('textbox', { name: 'Valor...' }).fill(String(value));
     // Clicking the adjacent cell confirms the value and triggers price recalculation
     await this.page.locator('tr[data-index="1"] td[data-column-id="metrosSemiCubiertos"] .\\!block').click();
-    await this.page.keyboard.press('Escape');
+    // Click the "Precio Unidad" column header to close any open inline editor without opening a new one
+    await this.page.getByText('Precio Unidad').click();
     await this.page.waitForLoadState('networkidle');
   }
 
@@ -90,12 +92,17 @@ class UnitsPage extends BasePage {
   async loadTemplate(xlsxFilePath) {
     await this.page.getByRole('button', { name: 'Templates' }).click();
     await this.page.getByRole('button', { name: 'Cargar Template de Unidades', exact: true }).click();
-    await this.page.getByText('Seleccionar desde mi').click();
-    await this.page.locator('div').filter({ hasText: /Cargar Template de Unidades/ }).nth(1).setInputFiles(xlsxFilePath);
+    const [fileChooser] = await Promise.all([
+      this.page.waitForEvent('filechooser'),
+      this.page.getByText('Seleccionar desde mi').click(),
+    ]);
+    await fileChooser.setFiles(xlsxFilePath);
     await this.page.getByRole('button', { name: 'Cargar', exact: true }).click();
-    await this.page.getByRole('button').filter({ hasText: /^$/ }).click();
+    await this.page.getByRole('button', { name: 'Cerrar' }).waitFor({ state: 'visible' });
+    await expect(this.page.getByText('Archivo subido exitosamente')).toBeVisible();
     await this.page.getByRole('button', { name: 'Cerrar' }).click();
     await this.page.waitForLoadState('networkidle');
+
   }
 }
 

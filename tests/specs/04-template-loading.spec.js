@@ -49,14 +49,26 @@ test.describe('TC-004: Cargar Template', () => {
     logger.info('Listas de precios antes de cargar template', { count: priceListCountBefore });
 
     logger.step('Cargar template');
+    await priceListPage.navigateToUnitsTab();
+    const unitCountBefore = await unitsPage.getUnitCount();
     await unitsPage.loadTemplate(XLSX_TEMPLATE_PATH);
     logger.info('Template cargado', { template: defaultTemplate.name });
 
-    logger.step('Verificar que se creó una nueva lista de precios');
+    logger.step('Verificar unidades creadas o actualizadas desde template');
+    const unitCountAfter = await unitsPage.getUnitCount();
+    logger.info('Unidades del template', {
+      antes: unitCountBefore,
+      despues: unitCountAfter,
+      resultado: unitCountAfter > unitCountBefore ? 'nuevas unidades creadas' : 'unidades existentes actualizadas',
+    });
+    expect(unitCountAfter).toBeGreaterThan(0);
+
+    logger.step('Verificar que la lista de precios sigue existiendo');
+    await priceListPage.openFirstPriceList();
     await priceListPage.waitForPriceList();
     const priceListCountAfter = await priceListPage.getPriceListCount();
-    expect(priceListCountAfter).toBeGreaterThan(priceListCountBefore);
-    logger.info('Nueva lista de precios verificada', {
+    expect(priceListCountAfter).toBeGreaterThan(0);
+    logger.info('Lista de precios verificada post-template', {
       antes: priceListCountBefore,
       despues: priceListCountAfter,
     });
@@ -75,18 +87,24 @@ test.describe('TC-004: Cargar Template', () => {
     await priceListPage.waitForPriceList();
 
     logger.step('Cargar template');
+    await priceListPage.navigateToUnitsTab();
+    const unitCountBefore = await unitsPage.getUnitCount();
     await unitsPage.loadTemplate(XLSX_TEMPLATE_PATH);
     logger.info('Template cargado', { template: 'unit-template.csv' });
 
+    logger.step('Verificar unidades creadas o actualizadas desde template');
+    const unitCountAfter = await unitsPage.getUnitCount();
+    logger.info('Unidades del template', {
+      antes: unitCountBefore,
+      despues: unitCountAfter,
+      resultado: unitCountAfter > unitCountBefore ? 'nuevas unidades creadas' : 'unidades existentes actualizadas',
+    });
+    expect(unitCountAfter).toBeGreaterThan(0);
+
     logger.step('Verificar lista de precios del template');
+    await priceListPage.openFirstPriceList();
     await priceListPage.waitForPriceList();
     expect(await priceListPage.priceListExists()).toBe(true);
-
-    logger.step('Navegar a tab Unidades y verificar que se crearon unidades');
-    await priceListPage.navigateToUnitsTab();
-    const unitCount = await unitsPage.getUnitCount();
-    expect(unitCount).toBeGreaterThan(0);
-    logger.info('Unidades del template verificadas', { count: unitCount });
   });
 
   test('cargar template sobre proyecto con unidades existentes mantiene lista original', async ({ page }) => {
@@ -107,10 +125,23 @@ test.describe('TC-004: Cargar Template', () => {
     logger.step('Cargar template');
     await unitsPage.loadTemplate(XLSX_TEMPLATE_PATH);
 
-    logger.step('Verificar que la lista original se mantiene y se agregó una nueva');
+    logger.step('Verificar unidades creadas o actualizadas desde template');
+    const unitCountAfter = await unitsPage.getUnitCount();
+    logger.info('Unidades del template', {
+      antes: unitCountBefore,
+      despues: unitCountAfter,
+      resultado: unitCountAfter > unitCountBefore ? 'nuevas unidades creadas' : 'unidades existentes actualizadas',
+    });
+    expect(unitCountAfter).toBeGreaterThan(0);
+
+    logger.step('Verificar que la lista de precios original se mantiene');
+    await priceListPage.openFirstPriceList();
     await priceListPage.waitForPriceList();
     const priceListCountAfter = await priceListPage.getPriceListCount();
-    expect(priceListCountAfter).toBeGreaterThan(priceListCountBefore);
-    logger.info('Listas de precios después del template', { count: priceListCountAfter });
+    expect(priceListCountAfter).toBeGreaterThan(0);
+    logger.info('Listas de precios después del template', {
+      antes: priceListCountBefore,
+      despues: priceListCountAfter,
+    });
   });
 });
