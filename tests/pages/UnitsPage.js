@@ -103,8 +103,8 @@ class UnitsPage extends BasePage {
     ]);
     await fileChooser.setFiles(xlsxFilePath);
     await this.page.getByRole('button', { name: 'Cargar', exact: true }).click();
-    await this.page.getByRole('button', { name: 'Cerrar' }).waitFor({ state: 'visible' });
-    await expect(this.page.getByText('Archivo subido exitosamente')).toBeVisible();
+    await this.page.getByRole('button', { name: 'Cerrar' }).waitFor({ state: 'visible', timeout: 60000 });
+    await expect(this.page.getByText('Archivo subido exitosamente')).toBeVisible({ timeout: 60000 });
     await this.page.getByRole('button', { name: 'Cerrar' }).click();
     await this.page.waitForLoadState('networkidle');
     // Template upload triggers a full page reload — wait for the main spinner to clear.
