@@ -64,8 +64,7 @@ test.describe('TC-005: Eliminar Unidad (Normal)', () => {
     logger.info('Unidades después de eliminar', { count: countAfter });
 
     logger.step('Verificar que la lista de precios se mantiene');
-    // Check the toolbar button "Lista precios {fecha}" — visible from the Unidades tab.
-    // Using priceListExistsInToolbar() avoids navigating to General tab just to check existence.
+    
     const hasPriceList = await priceListPage.priceListExistsInToolbar();
     expect(hasPriceList).toBe(true);
     logger.info('Lista de precios intacta', { filas: countAfter, filasPrevias: countBefore });
