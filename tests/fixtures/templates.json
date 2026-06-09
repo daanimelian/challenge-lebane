@@ -1,0 +1,66 @@
+{
+  "csvColumns": {
+    "required": [
+      "Numero de unidad",
+      "Tipologia",
+      "Orientacion",
+      "M2 cubiertos",
+      "M2 semi cubiertos",
+      "M2 descubiertos",
+      "M2 Comunes",
+      "M2 totales",
+      "Precio",
+      "Moneda",
+      "Estado",
+      "Piso"
+    ],
+    "optional": [
+      "Saldo financiado A",
+      "Abonado A",
+      "Saldo financiado B",
+      "Abonado B",
+      "Canal de venta",
+      "Canal contactacion",
+      "Saldo moroso",
+      "Dias atraso",
+      "TipoPropietario",
+      "Moneda alquiler",
+      "Valor alquiler"
+    ]
+  },
+  "validOptions": {
+    "Tipologia": [
+      "Baulera",
+      "Cinco ambientes",
+      "Cochera",
+      "Cuatro ambientes",
+      "Cuatro dormitorios",
+      "Diez ambientes",
+      "Dos ambientes",
+      "Dos dormitorios",
+      "Local",
+      "Lote",
+      "Mas de diez ambientes",
+      "Monoambiente",
+      "Monoambiente divisible",
+      "Nueve ambientes",
+      "Ocho ambientes",
+      "Oficina",
+      "Otros",
+      "Seis ambientes",
+      "Siete ambientes",
+      "Sin definir",
+      "Terraza privada",
+      "Terreno",
+      "Tres ambientes",
+      "Tres dormitorios",
+      "Un dormitorio",
+      "Unidad"
+    ],
+    "Orientacion": ["Contrafrente", "Frente", "Interno", "Lateral", "Sin definir"],
+    "Moneda": ["ARS", "COP", "EUR", "MXN", "PYG", "USD", "UYU"],
+    "Estado": ["DISPONIBLE", "VENDIDO", "ENTREGADO", "RESERVADO", "ALQUILADO", "BLOQUEADO"],
+    "TipoPropietario": ["PROPIETARIO", "INVERSOR"],
+    "Moneda alquiler": ["ARS", "COP", "EUR", "MXN", "PYG", "USD", "UYU"]
+  }
+}
