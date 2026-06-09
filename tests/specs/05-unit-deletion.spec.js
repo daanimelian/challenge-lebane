@@ -1,42 +1,10 @@
 const { test, expect } = require('@playwright/test');
-const LoginPage = require('../pages/LoginPage');
-const ProjectPage = require('../pages/ProjectPage');
-const UnitsPage = require('../pages/UnitsPage');
-const PriceListPage = require('../pages/PriceListPage');
-const testData = require('../fixtures/test-data');
 const logger = require('../../utils/logger');
-
-async function setupProjectWithUnits(page, unitConfig = testData.units.valid) {
-  const loginPage = new LoginPage(page);
-  const projectPage = new ProjectPage(page);
-  const unitsPage = new UnitsPage(page);
-  const priceListPage = new PriceListPage(page);
-
-  await loginPage.navigate();
-  await loginPage.login(testData.credentials.email, testData.credentials.password);
-
-  const projectName = testData.projects.valid.name();
-  await projectPage.clickNewProject();
-  await projectPage.fillProjectForm({ ...testData.projects.valid, name: projectName });
-  await projectPage.clickRegister();
-
-  await page.getByText('Comienza a operar tu proyecto').waitFor({ state: 'visible' });
-  await page.getByRole('button').nth(1).click();
-  await page.getByRole('button', { name: 'Comercial' }).locator('button').click();
-  await page.waitForLoadState('networkidle');
-  await page.getByRole('button', { name: 'Unidades' }).click();
-  await page.waitForLoadState('networkidle');
-
-  await unitsPage.fillUnitForm(unitConfig);
-  await unitsPage.saveUnits();
-  await priceListPage.waitForPriceList();
-  await priceListPage.navigateToUnitsTab();
-
-  return { unitsPage, priceListPage };
-}
+const { setupProjectWithUnits } = require('../helpers/setup');
 
 test.describe('TC-005: Eliminar Unidad (Normal)', () => {
   test.setTimeout(120000);
+
   test('eliminar una unidad reduce el listado y mantiene la lista de precios', { tag: '@sanity' }, async ({ page }) => {
     logger.step('Setup: login, proyecto y múltiples unidades');
     const { unitsPage, priceListPage } = await setupProjectWithUnits(page, {
@@ -55,7 +23,6 @@ test.describe('TC-005: Eliminar Unidad (Normal)', () => {
 
     logger.step('Eliminar una unidad');
     await unitsPage.deleteUnit(1);
-    logger.info('Unidad eliminada');
 
     logger.step('Verificar que el listado disminuyó en una unidad');
     await priceListPage.navigateToUnitsTab();
@@ -64,9 +31,7 @@ test.describe('TC-005: Eliminar Unidad (Normal)', () => {
     logger.info('Unidades después de eliminar', { count: countAfter });
 
     logger.step('Verificar que la lista de precios se mantiene');
-    
-    const hasPriceList = await priceListPage.priceListExistsInToolbar();
-    expect(hasPriceList).toBe(true);
+    expect(await priceListPage.priceListExistsInToolbar()).toBe(true);
     logger.info('Lista de precios intacta', { filas: countAfter, filasPrevias: countBefore });
   });
 
@@ -99,6 +64,7 @@ test.describe('TC-005: Eliminar Unidad (Normal)', () => {
 
 test.describe('TC-006: Eliminar Última Unidad de una Lista', () => {
   test.setTimeout(120000);
+
   test('eliminar la última unidad de la lista también elimina la lista de precios', { tag: '@sanity' }, async ({ page }) => {
     logger.step('Setup: login, proyecto y una sola unidad');
     const { unitsPage, priceListPage } = await setupProjectWithUnits(page, {
@@ -117,18 +83,14 @@ test.describe('TC-006: Eliminar Última Unidad de una Lista', () => {
 
     logger.step('Eliminar la única unidad');
     await unitsPage.deleteUnit(0);
-    logger.info('Unidad eliminada');
 
     logger.step('Verificar que la unidad fue eliminada');
-    // After deleting the last unit the page reloads and briefly shows "25 filas" (pagination
-    // placeholder). expect.poll() retries getUnitCount() until the grid settles at 0.
     await expect.poll(() => unitsPage.getUnitCount(), { timeout: 10000 }).toBe(0);
     logger.info('Lista de unidades vacía');
 
     logger.step('Verificar que la lista de precios también fue eliminada');
     await priceListPage.waitForPriceListGone();
-    const hasPriceList = await priceListPage.priceListExists();
-    expect(hasPriceList).toBe(false);
+    expect(await priceListPage.priceListExists()).toBe(false);
     logger.info('Lista de precios eliminada correctamente');
   });
 
