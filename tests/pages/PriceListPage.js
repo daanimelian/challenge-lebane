@@ -28,6 +28,13 @@ class PriceListPage extends BasePage {
   async navigateToUnitsTab() {
     await this.page.getByRole('tab', { name: 'Unidades' }).click();
     await this.page.waitForLoadState('networkidle');
+    // The table data loads asynchronously after the tab switch.
+    // Wait for the skeleton/loading indicator inside the tabpanel to disappear.
+    await this.page
+      .getByRole('tabpanel', { name: 'Unidades' })
+      .getByRole('progressbar')
+      .waitFor({ state: 'hidden', timeout: 10000 })
+      .catch(() => {});
   }
 
   async navigateToGeneralTab() {

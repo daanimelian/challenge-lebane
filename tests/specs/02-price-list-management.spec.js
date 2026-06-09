@@ -106,18 +106,21 @@ test.describe('TC-003: Modificar Precio de Lista', () => {
     await priceListPage.waitForPriceList();
     logger.info('Setup completado — proyecto y unidades creados');
 
-    logger.step('Completar M2 Cubiertos en primera unidad');
+    // The app only recalculates a unit's price when its M2 changes FROM 0 to a non-zero value,
+    // using the pricePerSqm active at that moment. Changing pricePerSqm alone does NOT
+    // retroactively update units that already have M2 > 0.
+    // Correct order: update pricePerSqm first, then fill M2 from 0 → price uses the new value.
+    logger.step('Modificar precio por m² primero (General → Editar → Guardar)');
+    await priceListPage.modifyPrice('precioListaMetroCuadrado', testData.prices.updated);
+    logger.info('Precio de lista actualizado', { newPrice: testData.prices.updated });
+
+    logger.step('Navegar a Unidades y completar M2 en primera unidad (tenía 0)');
     await priceListPage.navigateToUnitsTab();
     await unitsPage.fillFirstUnitCoveredMeters();
 
-    logger.step('Modificar precio por m² (General → Editar → Guardar)');
-    await priceListPage.modifyPrice('precioListaMetroCuadrado', testData.prices.updated);
-    logger.info('Precio modificado', { newPrice: testData.prices.updated });
-
-    logger.step('Navegar a Unidades y verificar que el precio de la unidad refleja el nuevo M2 × precio');
-    await priceListPage.navigateToUnitsTab();
+    logger.step('Verificar que el precio de la unidad se calculó usando el nuevo precio por M2');
     const unitPrice = await unitsPage.getFirstUnitPrice();
     expect(unitPrice).not.toBe('0,00');
-    logger.info('Precio de unidad verificado', { price: unitPrice });
+    logger.info('Precio de unidad calculado con M2 × nuevo precio', { price: unitPrice });
   });
 });

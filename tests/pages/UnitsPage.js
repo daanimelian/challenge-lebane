@@ -102,7 +102,25 @@ class UnitsPage extends BasePage {
     await expect(this.page.getByText('Archivo subido exitosamente')).toBeVisible();
     await this.page.getByRole('button', { name: 'Cerrar' }).click();
     await this.page.waitForLoadState('networkidle');
-
+    // After upload the app triggers a full page reload (main shows a loading spinner
+    // and the breadcrumb changes). Wait for that top-level reload to complete.
+    await this.page
+      .locator('main')
+      .getByRole('progressbar')
+      .waitFor({ state: 'hidden', timeout: 15000 })
+      .catch(() => {});
+    // Navigate to the Unidades tab explicitly (it may not be the active one after reload).
+    const unidadesTab = this.page.getByRole('tab', { name: 'Unidades' });
+    if (await unidadesTab.isVisible({ timeout: 5000 }).catch(() => false)) {
+      await unidadesTab.click();
+      await this.page.waitForLoadState('networkidle');
+    }
+    // Wait for the unit table to finish populating.
+    await this.page
+      .getByRole('tabpanel', { name: 'Unidades' })
+      .getByRole('progressbar')
+      .waitFor({ state: 'hidden', timeout: 10000 })
+      .catch(() => {});
   }
 }
 

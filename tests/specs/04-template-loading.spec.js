@@ -32,7 +32,7 @@ async function loginAndNavigateToUnits(page) {
 }
 
 test.describe('TC-004: Cargar Template', () => {
-  test('cargar template crea nueva lista de precios', { tag: '@sanity' }, async ({ page }) => {
+  test('cargar template agrega unidades a la lista de precios existente', { tag: '@sanity' }, async ({ page }) => {
     const unitsPage = new UnitsPage(page);
     const priceListPage = new PriceListPage(page);
     const defaultTemplate = { name: 'unit-template.csv' };
