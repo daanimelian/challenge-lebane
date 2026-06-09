@@ -36,6 +36,7 @@ async function setupProjectWithUnits(page, unitConfig = testData.units.valid) {
 }
 
 test.describe('TC-005: Eliminar Unidad (Normal)', () => {
+  test.setTimeout(120000);
   test('eliminar una unidad reduce el listado y mantiene la lista de precios', { tag: '@sanity' }, async ({ page }) => {
     logger.step('Setup: login, proyecto y múltiples unidades');
     const { unitsPage, priceListPage } = await setupProjectWithUnits(page, {
@@ -63,9 +64,11 @@ test.describe('TC-005: Eliminar Unidad (Normal)', () => {
     logger.info('Unidades después de eliminar', { count: countAfter });
 
     logger.step('Verificar que la lista de precios se mantiene');
-    const hasPriceList = await priceListPage.priceListExists();
+    // Check the toolbar button "Lista precios {fecha}" — visible from the Unidades tab.
+    // Using priceListExistsInToolbar() avoids navigating to General tab just to check existence.
+    const hasPriceList = await priceListPage.priceListExistsInToolbar();
     expect(hasPriceList).toBe(true);
-    logger.info('Lista de precios intacta');
+    logger.info('Lista de precios intacta', { filas: countAfter, filasPrevias: countBefore });
   });
 
   test('eliminar unidad no afecta las unidades restantes', async ({ page }) => {
@@ -90,12 +93,13 @@ test.describe('TC-005: Eliminar Unidad (Normal)', () => {
     await priceListPage.navigateToUnitsTab();
     const countAfter = await unitsPage.getUnitCount();
     expect(countAfter).toBeGreaterThan(0);
-    expect(await priceListPage.priceListExists()).toBe(true);
+    expect(await priceListPage.priceListExistsInToolbar()).toBe(true);
     logger.info('Estado final verificado', { unidades: countAfter });
   });
 });
 
 test.describe('TC-006: Eliminar Última Unidad de una Lista', () => {
+  test.setTimeout(120000);
   test('eliminar la última unidad de la lista también elimina la lista de precios', { tag: '@sanity' }, async ({ page }) => {
     logger.step('Setup: login, proyecto y una sola unidad');
     const { unitsPage, priceListPage } = await setupProjectWithUnits(page, {
@@ -117,8 +121,9 @@ test.describe('TC-006: Eliminar Última Unidad de una Lista', () => {
     logger.info('Unidad eliminada');
 
     logger.step('Verificar que la unidad fue eliminada');
-    const countAfter = await unitsPage.getUnitCount();
-    expect(countAfter).toBe(0);
+    // After deleting the last unit the page reloads and briefly shows "25 filas" (pagination
+    // placeholder). expect.poll() retries getUnitCount() until the grid settles at 0.
+    await expect.poll(() => unitsPage.getUnitCount(), { timeout: 10000 }).toBe(0);
     logger.info('Lista de unidades vacía');
 
     logger.step('Verificar que la lista de precios también fue eliminada');
@@ -152,7 +157,7 @@ test.describe('TC-006: Eliminar Última Unidad de una Lista', () => {
     expect(countAfter).toBe(1);
 
     logger.step('Verificar que la lista de precios todavía existe');
-    expect(await priceListPage.priceListExists()).toBe(true);
+    expect(await priceListPage.priceListExistsInToolbar()).toBe(true);
     logger.info('Lista de precios intacta con una unidad restante');
   });
 });

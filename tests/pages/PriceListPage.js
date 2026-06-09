@@ -13,6 +13,12 @@ class PriceListPage extends BasePage {
     return await this.page.getByRole('heading', { name: 'Nombre de la lista de precios' }).isVisible();
   }
 
+  // Checks for the "Lista precios {fecha}" button in the tab toolbar — visible from any tab,
+  // so it works when we're already on the Unidades tab without navigating to General.
+  async priceListExistsInToolbar() {
+    return await this.page.getByRole('button', { name: /Lista precios/ }).isVisible();
+  }
+
   async getPriceListCount() {
     return await this.page.getByRole('heading', { name: 'Nombre de la lista de precios' }).count();
   }
@@ -28,12 +34,12 @@ class PriceListPage extends BasePage {
   async navigateToUnitsTab() {
     await this.page.getByRole('tab', { name: 'Unidades' }).click();
     await this.page.waitForLoadState('networkidle');
-    // The table data loads asynchronously after the tab switch.
-    // Wait for the skeleton/loading indicator inside the tabpanel to disappear.
+    // The tabpanel progressbar may persist even after data loads (MUI DataGrid behavior).
+    // Wait briefly; "N filas" text is the reliable signal that data is ready.
     await this.page
       .getByRole('tabpanel', { name: 'Unidades' })
       .getByRole('progressbar')
-      .waitFor({ state: 'hidden', timeout: 10000 })
+      .waitFor({ state: 'hidden', timeout: 2000 })
       .catch(() => {});
   }
 

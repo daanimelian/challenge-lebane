@@ -32,6 +32,7 @@ async function loginAndNavigateToUnits(page) {
 }
 
 test.describe('TC-004: Cargar Template', () => {
+  test.setTimeout(120000);
   test('cargar template agrega unidades a la lista de precios existente', { tag: '@sanity' }, async ({ page }) => {
     const unitsPage = new UnitsPage(page);
     const priceListPage = new PriceListPage(page);

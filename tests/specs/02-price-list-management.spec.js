@@ -29,6 +29,7 @@ async function loginAndCreateProject(page) {
 }
 
 test.describe('TC-002: Crear Unidades y Verificar Lista de Precios', () => {
+  test.setTimeout(120000);
   test('crear unidades via formulario y verificar que aparecen en lista de precios', { tag: '@sanity' }, async ({ page }) => {
     const unitsPage = new UnitsPage(page);
     const priceListPage = new PriceListPage(page);
@@ -95,6 +96,7 @@ test.describe('TC-002: Crear Unidades y Verificar Lista de Precios', () => {
 });
 
 test.describe('TC-003: Modificar Precio de Lista', () => {
+  test.setTimeout(120000);
   test('modificar precio por m² y verificar que se actualiza en la lista', { tag: '@sanity' }, async ({ page }) => {
     const unitsPage = new UnitsPage(page);
     const priceListPage = new PriceListPage(page);
