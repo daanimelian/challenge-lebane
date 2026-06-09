@@ -27,6 +27,13 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
+      - name: Check connectivity
+        run: |
+          echo "BASE_URL set: ${{ secrets.BASE_URL != '' }}"
+          curl -v --max-time 15 "$BASE_URL/sign-in" 2>&1 | head -80 || true
+        env:
+          BASE_URL: ${{ secrets.BASE_URL }}
+
       - name: Run tests
         run: npm test
         env:
